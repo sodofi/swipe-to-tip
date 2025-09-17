@@ -1,0 +1,165 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;750;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Celo Brutalist Color Palette */
+    --celo-yellow: #FCFF52;
+    --celo-green: #4E632A;
+    --celo-purple: #1A0329;
+    --celo-tan-light: #FBF6F1;
+    --celo-tan-dark: #E6E3D5;
+    --celo-brown: #635949;
+    --celo-pink: #F2A9E7;
+    --celo-orange: #F29E5F;
+    --celo-lime: #B2EBA1;
+    --celo-blue: #8AC0F9;
+    
+    /* System Colors */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: var(--celo-tan-light);
+    --secondary-foreground: 0 0% 0%;
+    
+    --muted: var(--celo-tan-dark);
+    --muted-foreground: var(--celo-brown);
+    
+    --accent: var(--celo-yellow);
+    --accent-foreground: 0 0% 0%;
+    
+    --destructive: var(--celo-purple);
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 0 0% 0%;
+    --input: 0 0% 100%;
+    --ring: var(--celo-yellow);
+    
+    --radius: 0rem; /* Sharp corners for brutalist style */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer components {
+  /* Typography Classes */
+  .brutalist-headline {
+    font-family: 'Playfair Display', serif;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 0.9;
+  }
+  
+  .brutalist-body {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  
+  .brutalist-heavy {
+    font-weight: 750;
+  }
+  
+  /* Color Classes */
+  .celo-yellow { background-color: var(--celo-yellow); }
+  .celo-green { background-color: var(--celo-green); }
+  .celo-purple { background-color: var(--celo-purple); }
+  .celo-tan-light { background-color: var(--celo-tan-light); }
+  .celo-tan-dark { background-color: var(--celo-tan-dark); }
+  .celo-brown { background-color: var(--celo-brown); }
+  .celo-pink { background-color: var(--celo-pink); }
+  .celo-orange { background-color: var(--celo-orange); }
+  .celo-lime { background-color: var(--celo-lime); }
+  .celo-blue { background-color: var(--celo-blue); }
+  
+  .text-celo-yellow { color: var(--celo-yellow); }
+  .text-celo-green { color: var(--celo-green); }
+  .text-celo-purple { color: var(--celo-purple); }
+  .text-celo-brown { color: var(--celo-brown); }
+  .text-celo-pink { color: var(--celo-pink); }
+  .text-celo-orange { color: var(--celo-orange); }
+  .text-celo-lime { color: var(--celo-lime); }
+  .text-celo-blue { color: var(--celo-blue); }
+  
+  /* Border Classes */
+  .border-celo-yellow { border-color: var(--celo-yellow); }
+  .border-celo-green { border-color: var(--celo-green); }
+  .border-celo-purple { border-color: var(--celo-purple); }
+  
+  /* Brutalist Components */
+  .brutalist-button {
+    @apply border-4 border-black font-bold uppercase tracking-wider transition-all duration-75;
+  }
+  
+  .brutalist-button:hover {
+    @apply translate-x-1 translate-y-1;
+  }
+  
+  .brutalist-card {
+    @apply border-4 border-black;
+  }
+  
+  .brutalist-input {
+    @apply border-4 border-black bg-white text-black font-bold;
+  }
+  
+  .brutalist-input:focus {
+    @apply outline-none ring-4 ring-yellow-400;
+  }
+  
+  /* Color Inversion Hovers */
+  .hover-invert-yellow:hover {
+    @apply bg-black text-yellow-400 border-yellow-400;
+  }
+  
+  .hover-invert-green:hover {
+    @apply bg-white text-green-800 border-green-800;
+  }
+  
+  .hover-invert-purple:hover {
+    @apply text-white border-white;
+    background-color: var(--celo-purple);
+  }
+  
+  /* Custom Scrollbar for Description */
+  .description-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #000 transparent;
+  }
+  
+  .description-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .description-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .description-scroll::-webkit-scrollbar-thumb {
+    background-color: #000;
+    border-radius: 0px;
+    border: 2px solid transparent;
+  }
+  
+  .description-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: var(--celo-yellow);
+  }
+}

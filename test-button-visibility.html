@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Button Visibility</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test { padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        .info { background: #d1ecf1; border-color: #bee5eb; }
+    </style>
+</head>
+<body>
+    <h1>Testing Button Visibility Logic</h1>
+    <div id="results"></div>
+
+    <script>
+        function testButtonLogic() {
+            const resultsDiv = document.getElementById('results');
+
+            // Simulate the component logic
+            const projects = [
+                { uid: '1', details: { title: 'Project 1' } },
+                { uid: '2', details: { title: 'Project 2' } },
+                { uid: '3', details: { title: 'Project 3' } }
+            ];
+
+            let currentIndex = 0;
+
+            // Test 1: Check slice logic
+            const visibleProjects = projects.slice(currentIndex, currentIndex + 3);
+            resultsDiv.innerHTML += `<div class="info">Test 1: Visible projects (slice): ${visibleProjects.map(p => p.details.title).join(', ')}</div>`;
+
+            // Test 2: Check isCurrentCard logic for each card
+            visibleProjects.forEach((project, index) => {
+                const isCurrentCard = index === 0;
+                const result = isCurrentCard ? 'CURRENT (buttons visible)' : 'background card';
+                resultsDiv.innerHTML += `<div class="test ${isCurrentCard ? 'success' : 'info'}">Card ${index}: ${project.details.title} - ${result}</div>`;
+            });
+
+            // Test 3: Simulate what happens when currentIndex changes
+            resultsDiv.innerHTML += `<div class="info"><h3>After swiping (currentIndex = 1):</h3></div>`;
+            currentIndex = 1;
+            const visibleProjects2 = projects.slice(currentIndex, currentIndex + 3);
+
+            visibleProjects2.forEach((project, index) => {
+                const isCurrentCard = index === 0;
+                const result = isCurrentCard ? 'CURRENT (buttons visible)' : 'background card';
+                resultsDiv.innerHTML += `<div class="test ${isCurrentCard ? 'success' : 'info'}">Card ${index}: ${project.details.title} - ${result}</div>`;
+            });
+
+            // Test 4: Button visibility conclusion
+            resultsDiv.innerHTML += `
+                <div class="success">
+                    <h3>✅ Button Logic Analysis:</h3>
+                    <ul>
+                        <li>Only the card with <code>index === 0</code> shows buttons</li>
+                        <li>This corresponds to <code>projects[currentIndex]</code></li>
+                        <li>As currentIndex increases, new cards become the "current" card</li>
+                        <li>Buttons should always be visible on the top card</li>
+                    </ul>
+                </div>
+            `;
+
+            // Test if there might be an issue
+            if (projects.length === 0) {
+                resultsDiv.innerHTML += `<div class="error">❌ Issue: If projects array is empty, no cards render = no buttons</div>`;
+            } else {
+                resultsDiv.innerHTML += `<div class="success">✅ Projects array has data, buttons should be visible</div>`;
+            }
+        }
+
+        testButtonLogic();
+    </script>
+</body>
+</html>

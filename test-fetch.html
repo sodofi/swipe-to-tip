@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>Testing Celo Projects API</h1>
+    <div id="results"></div>
+
+    <script>
+        async function testAPI() {
+            const resultsDiv = document.getElementById('results');
+
+            try {
+                const response = await fetch('https://gapapi.karmahq.xyz/v2/communities/celo/projects?page=1&limit=50');
+                const data = await response.json();
+
+                // Check different possible data structures
+                const projects = data.payload || data.projects || [];
+
+                resultsDiv.innerHTML = `
+                    <h2>API Response:</h2>
+                    <p>Response OK: ${response.ok}</p>
+                    <p>Status: ${response.status}</p>
+                    <p>Data has 'payload': ${data.payload ? 'Yes' : 'No'}</p>
+                    <p>Data has 'projects': ${data.projects ? 'Yes' : 'No'}</p>
+                    <p>Number of projects found: ${projects.length}</p>
+
+                    <h3>First 3 Projects:</h3>
+                    ${projects.slice(0, 3).map(p => `
+                        <div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+                            <h4>${p.details?.title || 'No title'}</h4>
+                            <p>${p.details?.description?.substring(0, 200) || 'No description'}...</p>
+                            <p>Transactions: ${p.numTransactions || 0}</p>
+                            <p>Progress: ${p.percentCompleted || 0}%</p>
+                        </div>
+                    `).join('')}
+
+                    <h3>Full Response Structure:</h3>
+                    <pre>${JSON.stringify(data, null, 2).substring(0, 1000)}...</pre>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+
+        testAPI();
+    </script>
+</body>
+</html>

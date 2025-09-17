@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Save Functionality</title>
+</head>
+<body>
+    <h1>Testing Project Save Functionality</h1>
+    <div id="status"></div>
+    <button onclick="testSave()">Test Save</button>
+    <div id="saved-list"></div>
+
+    <script>
+        let projects = [];
+        let savedProjects = [];
+        let currentIndex = 0;
+
+        async function loadProjects() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = 'Loading projects...';
+
+            try {
+                const response = await fetch(
+                    'https://gapapi.karmahq.xyz/v2/communities/celo/projects?page=1&limit=10&programIds=944_42161'
+                );
+                const data = await response.json();
+                projects = data.payload || [];
+
+                // Sort by transactions
+                projects.sort((a, b) => (b.numTransactions || 0) - (a.numTransactions || 0));
+
+                statusDiv.innerHTML = `✅ Loaded ${projects.length} projects. First project: ${projects[0]?.details?.title} (uid: ${projects[0]?.uid})`;
+            } catch (error) {
+                statusDiv.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+
+        function testSave() {
+            const currentProject = projects[currentIndex];
+
+            if (!currentProject) {
+                alert('No more projects');
+                return;
+            }
+
+            console.log('Attempting to save:', currentProject.details.title, 'uid:', currentProject.uid);
+
+            // Check if already saved
+            if (!savedProjects.find(p => p.uid === currentProject.uid)) {
+                savedProjects.push(currentProject);
+                console.log('Project saved! Total saved:', savedProjects.length);
+                updateSavedList();
+            } else {
+                console.log('Project already saved');
+            }
+
+            currentIndex++;
+        }
+
+        function updateSavedList() {
+            const listDiv = document.getElementById('saved-list');
+            listDiv.innerHTML = '<h2>Saved Projects (' + savedProjects.length + '):</h2>';
+
+            savedProjects.forEach(project => {
+                listDiv.innerHTML += `
+                    <div style="border: 1px solid #ccc; padding: 10px; margin: 5px;">
+                        <strong>${project.details.title}</strong><br>
+                        UID: ${project.uid}<br>
+                        Transactions: ${project.numTransactions}
+                    </div>
+                `;
+            });
+        }
+
+        // Load projects on page load
+        loadProjects();
+    </script>
+</body>
+</html>
