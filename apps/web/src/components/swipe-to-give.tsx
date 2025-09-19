@@ -59,7 +59,7 @@ const TOKENS = [
   { symbol: 'CELO', name: 'Celo' },
 ];
 
-const TIP_AMOUNTS = [5, 10, 25, 50];
+const TIP_AMOUNTS = [1, 5, 10, 25];
 
 export default function SwipeToGive() {
   // State
@@ -261,18 +261,25 @@ export default function SwipeToGive() {
   };
 
   const handleTipAll = async () => {
-    const totalAmount = savedProjects.reduce((sum, project) => {
-      const customAmount = parseFloat(customAmounts[project.uid] || '25');
-      return sum + (isNaN(customAmount) ? 25 : customAmount);
-    }, 0);
-
+    // Validate all amounts first
     for (const project of savedProjects) {
       const amount = parseFloat(customAmounts[project.uid] || '25');
-      if (!isNaN(amount)) {
-        await handleTip(project, amount);
-        // Add small delay between tips
-        await new Promise(resolve => setTimeout(resolve, 1000));
+      if (isNaN(amount) || amount <= 0) {
+        addToast({
+          title: 'Invalid Amount',
+          description: `Please enter a valid tip amount for ${project.details.title}`,
+          variant: 'destructive'
+        });
+        return;
       }
+    }
+
+    // If all amounts are valid, proceed with tipping
+    for (const project of savedProjects) {
+      const amount = parseFloat(customAmounts[project.uid] || '25');
+      await handleTip(project, amount);
+      // Add small delay between tips
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
   };
 
@@ -459,7 +466,7 @@ export default function SwipeToGive() {
                                 [project.uid]: amount.toString() 
                               }))}
                               className={`brutalist-button px-2 py-2 md:px-3 md:py-3 text-xs md:text-sm ${
-                                customAmounts[project.uid] === amount.toString()
+                                (customAmounts[project.uid] || '25') === amount.toString()
                                   ? 'bg-celo-yellow text-black'
                                   : 'bg-white text-black hover-invert-yellow'
                               }`}
@@ -473,7 +480,7 @@ export default function SwipeToGive() {
                           <input
                             type="number"
                             placeholder="25"
-                            value={customAmounts[project.uid] || '25'}
+                            value={customAmounts[project.uid] || ''}
                             onChange={(e) => setCustomAmounts(prev => ({
                               ...prev,
                               [project.uid]: e.target.value
@@ -482,10 +489,18 @@ export default function SwipeToGive() {
                           />
                           
                           <button
-                            onClick={() => handleTip(
-                              project, 
-                              parseFloat(customAmounts[project.uid] || '25')
-                            )}
+                            onClick={() => {
+                              const amount = parseFloat(customAmounts[project.uid] || '25');
+                              if (isNaN(amount) || amount <= 0) {
+                                addToast({
+                                  title: 'Invalid Amount',
+                                  description: 'Please enter a valid tip amount greater than 0',
+                                  variant: 'destructive'
+                                });
+                                return;
+                              }
+                              handleTip(project, amount);
+                            }}
                             disabled={tipping[project.uid]}
                             className="brutalist-button bg-celo-yellow text-black px-4 py-2 md:px-6 md:py-3 hover-invert-yellow text-xs md:text-sm"
                           >
