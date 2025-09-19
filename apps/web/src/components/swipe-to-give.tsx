@@ -22,6 +22,9 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Toast, ToastTitle, ToastDescription } from '@/components/ui/toast';
 import { sdk } from '@farcaster/frame-sdk';
+import { DaimoPayButton, useDaimoPayUI } from '@daimo/pay';
+import { celoUSDC } from '@daimo/pay-common';
+import { getAddress } from 'viem';
 
 // Types
 interface Project {
@@ -52,14 +55,15 @@ interface ToastMessage {
 const SWIPE_THRESHOLD = 100;
 const CARD_ROTATION_DEGREES = 15;
 
-// Token options
-const TOKENS = [
-  { symbol: 'USDC', name: 'USD Coin' },
-  { symbol: 'cUSD', name: 'Celo Dollar' },
-  { symbol: 'CELO', name: 'Celo' },
-];
+// Using USDC on Celo via Daimo Pay
 
 const TIP_AMOUNTS = [1, 5, 10, 25];
+
+// Helper function to format amount to 2 decimal places
+const formatAmount = (amount: string | number): string => {
+  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+  return isNaN(num) || num <= 0 ? '25.00' : num.toFixed(2);
+};
 
 export default function SwipeToGive() {
   // State
@@ -72,9 +76,13 @@ export default function SwipeToGive() {
   const [showSaved, setShowSaved] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [tipping, setTipping] = useState<{ [key: string]: boolean }>({});
-  const [selectedToken, setSelectedToken] = useState('USDC');
+  // Token selection removed - using USDC on Celo via Daimo Pay
   const [customAmounts, setCustomAmounts] = useState<{ [key: string]: string }>({});
   const [hasLoadedProjects, setHasLoadedProjects] = useState(false);
+  const [currentTippingProject, setCurrentTippingProject] = useState<Project | null>(null);
+
+  // Daimo Pay UI instance
+  const { resetPayment } = useDaimoPayUI();
 
   // Motion values for swipe animation
   const x = useMotionValue(0);
@@ -219,67 +227,44 @@ export default function SwipeToGive() {
     }
   };
 
-  // Tipping functionality
-  const handleTip = async (project: Project, amount: number) => {
-    const projectId = project.uid;
-    setTipping(prev => ({ ...prev, [projectId]: true }));
-    
-    try {
-      // Find the owner's address
-      const owner = project.members.find(member => member.role === 'owner');
-      if (!owner) {
-        throw new Error('No owner found for this project');
-      }
+  // Store the show function for the current tipping project
+  const [showPaymentModal, setShowPaymentModal] = useState<(() => void) | null>(null);
 
-       // Check if sendToken method exists before calling
-       if (sdk.actions?.sendToken) {
-         await sdk.actions.sendToken({
-           token: selectedToken,
-           amount: amount.toString(),
-           recipientAddress: owner.address
-         });
-       } else {
-         throw new Error('Token sending is not available in this environment');
-       }
+  // Handle tip button click - updates Daimo Pay with current project amount
+  const handleTipClick = (project: Project) => {
+    const amount = formatAmount(customAmounts[project.uid] || '25');
+    const numAmount = parseFloat(amount);
 
+    if (isNaN(numAmount) || numAmount <= 0) {
       addToast({
-        title: 'Tip Sent Successfully!',
-        description: `$${amount} ${selectedToken} sent to ${project.details.title}`,
-        variant: 'success'
-      });
-
-    } catch (error: any) {
-      console.error('Tip failed:', error);
-      addToast({
-        title: 'Tip Failed',
-        description: error.message || 'Failed to send tip. Please try again.',
+        title: 'Invalid Amount',
+        description: 'Please enter a valid tip amount greater than 0',
         variant: 'destructive'
       });
-    } finally {
-      setTipping(prev => ({ ...prev, [projectId]: false }));
+      return;
     }
-  };
 
-  const handleTipAll = async () => {
-    // Validate all amounts first
-    for (const project of savedProjects) {
-      const amount = parseFloat(customAmounts[project.uid] || '25');
-      if (isNaN(amount) || amount <= 0) {
-        addToast({
-          title: 'Invalid Amount',
-          description: `Please enter a valid tip amount for ${project.details.title}`,
-          variant: 'destructive'
-        });
-        return;
+    // Set current project for tracking
+    setCurrentTippingProject(project);
+
+    // Update Daimo Pay with current project's details and amount
+    resetPayment({
+      toAddress: "0x4858aBb6dfF69904f1c155D40A48CD8846AEA2f6",
+      toChain: celoUSDC.chainId,
+      toToken: getAddress(celoUSDC.token),
+      toUnits: amount, // Properly formatted 2-decimal amount
+      refundAddress: "0x4858aBb6dfF69904f1c155D40A48CD8846AEA2f6",
+      metadata: {
+        projectId: project.uid,
+        projectTitle: project.details.title,
+        tipType: 'project_tip',
+        amount: amount
       }
-    }
+    });
 
-    // If all amounts are valid, proceed with tipping
-    for (const project of savedProjects) {
-      const amount = parseFloat(customAmounts[project.uid] || '25');
-      await handleTip(project, amount);
-      // Add small delay between tips
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    // Trigger the payment modal if available
+    if (showPaymentModal) {
+      showPaymentModal();
     }
   };
 
@@ -359,7 +344,7 @@ export default function SwipeToGive() {
             </div>
 
             {/* Mobile-Responsive Token Selection */}
-            <div className="mb-6 md:mb-8">
+            {/* <div className="mb-6 md:mb-8">
               <div className="brutalist-card bg-black p-4 md:p-6 mb-6">
                 <h2 className="brutalist-body text-celo-yellow text-sm md:text-lg brutalist-heavy uppercase tracking-widest mb-4 md:mb-6">
                   SELECT TOKEN
@@ -380,7 +365,7 @@ export default function SwipeToGive() {
                   ))}
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Empty state */}
@@ -489,18 +474,7 @@ export default function SwipeToGive() {
                           />
                           
                           <button
-                            onClick={() => {
-                              const amount = parseFloat(customAmounts[project.uid] || '25');
-                              if (isNaN(amount) || amount <= 0) {
-                                addToast({
-                                  title: 'Invalid Amount',
-                                  description: 'Please enter a valid tip amount greater than 0',
-                                  variant: 'destructive'
-                                });
-                                return;
-                              }
-                              handleTip(project, amount);
-                            }}
+                            onClick={() => handleTipClick(project)}
                             disabled={tipping[project.uid]}
                             className="brutalist-button bg-celo-yellow text-black px-4 py-2 md:px-6 md:py-3 hover-invert-yellow text-xs md:text-sm"
                           >
@@ -520,21 +494,7 @@ export default function SwipeToGive() {
                 ))}
               </div>
 
-              {/* Mobile-Responsive Tip All Button */}
-              {savedProjects.length > 1 && (
-                <div className="brutalist-card bg-celo-purple p-6 md:p-8 text-center">
-                  <h3 className="brutalist-headline text-2xl md:text-3xl lg:text-4xl text-white mb-4 md:mb-6">
-                    TIP <em>ALL</em>
-                  </h3>
-                  <button
-                    onClick={handleTipAll}
-                    className="brutalist-button bg-celo-lime text-black px-6 py-4 md:px-12 md:py-6 text-sm md:text-lg lg:text-xl"
-                  >
-                    <DollarSign className="inline-block h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6 mr-2 md:mr-4" />
-                    SEND TO ALL
-                  </button>
-                </div>
-              )}
+              {/* Note: Tip All functionality removed - users tip each project individually with Daimo Pay */}
             </>
           )}
         </div>
@@ -811,6 +771,74 @@ export default function SwipeToGive() {
             </div>
           ))}
         </div>
+
+        {/* Daimo Pay Custom Button - Hidden but used for programmatic triggering */}
+        <DaimoPayButton.Custom
+          appId={process.env.NEXT_PUBLIC_DAIMO_APP_ID!}
+          intent="Tip"
+          toAddress="0x4858aBb6dfF69904f1c155D40A48CD8846AEA2f6"
+          toChain={celoUSDC.chainId}
+          toToken={getAddress(celoUSDC.token)}
+          toUnits="25.00" // Default amount, will be updated by resetPayment
+          refundAddress="0x4858aBb6dfF69904f1c155D40A48CD8846AEA2f6"
+          metadata={{
+            projectId: currentTippingProject?.uid || 'default',
+            projectTitle: currentTippingProject?.details.title || 'Default Project',
+            tipType: 'project_tip'
+          }}
+          closeOnSuccess={true}
+          onPaymentStarted={(e: any) => {
+            console.log('Payment started:', e);
+            if (currentTippingProject) {
+              setTipping(prev => ({ ...prev, [currentTippingProject.uid]: true }));
+              addToast({
+                title: 'Payment Started',
+                description: `Processing tip to ${currentTippingProject.details.title}`,
+                variant: 'default'
+              });
+            }
+          }}
+          onPaymentCompleted={(e: any) => {
+            console.log('Payment completed:', e);
+            if (currentTippingProject) {
+              setTipping(prev => ({ ...prev, [currentTippingProject.uid]: false }));
+              const amount = formatAmount(customAmounts[currentTippingProject.uid] || '25');
+              addToast({
+                title: 'Tip Sent Successfully!',
+                description: `$${amount} USDC sent to ${currentTippingProject.details.title}`,
+                variant: 'success'
+              });
+            }
+          }}
+          onPaymentBounced={(e: any) => {
+            console.log('Payment bounced:', e);
+            if (currentTippingProject) {
+              setTipping(prev => ({ ...prev, [currentTippingProject.uid]: false }));
+              addToast({
+                title: 'Payment Failed',
+                description: 'Payment was refunded. Please try again.',
+                variant: 'destructive'
+              });
+            }
+          }}
+          onOpen={() => {
+            console.log('Daimo Pay modal opened');
+          }}
+          onClose={() => {
+            console.log('Daimo Pay modal closed');
+            setCurrentTippingProject(null);
+          }}
+        >
+          {({ show, hide }) => {
+            // Store the show function so it can be called from tip buttons
+            if (showPaymentModal !== show) {
+              setShowPaymentModal(() => show);
+            }
+            // Return hidden element since we're triggering programmatically
+            return <div style={{ display: 'none' }} />;
+          }}
+        </DaimoPayButton.Custom>
+
     </div>
   );
 }
