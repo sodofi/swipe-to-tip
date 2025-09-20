@@ -1,27 +1,16 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { 
-  Heart, 
-  X, 
-  ArrowLeft, 
-  DollarSign, 
-  Users, 
-  Target, 
-  Star, 
-  Trophy,
+import {
+  Heart,
+  X,
+  ArrowLeft,
+  DollarSign,
   Loader2,
   RefreshCw,
   AlertCircle
 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Toast, ToastTitle, ToastDescription } from '@/components/ui/toast';
-import { sdk } from '@farcaster/frame-sdk';
 import { DaimoPayButton, useDaimoPayUI } from '@daimo/pay';
 import { celoUSDC } from '@daimo/pay-common';
 import { getAddress } from 'viem';
@@ -70,7 +59,6 @@ export default function SwipeToGive() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [savedProjects, setSavedProjects] = useState<Project[]>([]);
-  const [passedProjects, setPassedProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showSaved, setShowSaved] = useState(false);
@@ -99,7 +87,7 @@ export default function SwipeToGive() {
     if (!hasLoadedProjects) {
       fetchProjects();
     }
-  }, []); // Empty dependency array ensures this only runs once on mount
+  }, [hasLoadedProjects]); // Include hasLoadedProjects dependency
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -204,10 +192,6 @@ export default function SwipeToGive() {
   };
 
   const handlePass = () => {
-    const currentProject = projects[currentIndex];
-    if (currentProject) {
-      setPassedProjects(prev => [...prev, currentProject]);
-    }
     nextCard();
   };
 
@@ -385,7 +369,7 @@ export default function SwipeToGive() {
             <>
               {/* Mobile-Responsive Saved Projects List */}
               <div className="space-y-4 md:space-y-6 mb-6 md:mb-12">
-                {savedProjects.map((project, index) => (
+                {savedProjects.map((project) => (
                   <div key={project.uid} className="brutalist-card bg-white p-4 md:p-6">
                     <div className="flex flex-col space-y-4">
                       {/* Project Info */}
@@ -723,7 +707,7 @@ export default function SwipeToGive() {
                     ALL DONE!
                   </h2>
                   <p className="brutalist-body text-white text-xl mb-8 uppercase tracking-wide">
-                    You've viewed all available projects
+                    You&apos;ve viewed all available projects
                   </p>
                   <button 
                     onClick={() => setShowSaved(true)}
@@ -829,7 +813,7 @@ export default function SwipeToGive() {
             setCurrentTippingProject(null);
           }}
         >
-          {({ show, hide }) => {
+          {({ show }) => {
             // Store the show function so it can be called from tip buttons
             if (showPaymentModal !== show) {
               setShowPaymentModal(() => show);
