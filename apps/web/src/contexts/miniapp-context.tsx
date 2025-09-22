@@ -11,7 +11,6 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import FrameWalletProvider from "./frame-wallet-context";
 
 interface MiniAppContextType {
   isMiniAppReady: boolean;
@@ -29,7 +28,13 @@ interface MiniAppProviderProps {
 
 export function MiniAppProvider({ children, addMiniAppOnLoad }: MiniAppProviderProps): JSX.Element {
   const [context, setContext] = useState<FrameContext | null>(null);
-  const [isMiniAppReady, setIsMiniAppReady] = useState(false);
+  // Start as ready in development or if not in a Farcaster environment
+  const [isMiniAppReady, setIsMiniAppReady] = useState(
+    typeof window !== 'undefined' && (
+      process.env.NODE_ENV === 'development' ||
+      !window.location.href.includes('farcaster')
+    )
+  );
 
   const setMiniAppReady = useCallback(async () => {
     try {
@@ -52,12 +57,11 @@ export function MiniAppProvider({ children, addMiniAppOnLoad }: MiniAppProviderP
   }, []);
 
   useEffect(() => {
-    if (!isMiniAppReady) {
-      setMiniAppReady().then(() => {
-        console.log("MiniApp loaded");
-      });
-    }
-  }, [isMiniAppReady, setMiniAppReady]);
+    // Always try to initialize, but don't block if already ready
+    setMiniAppReady().then(() => {
+      console.log("MiniApp loaded");
+    });
+  }, [setMiniAppReady]);
 
   const handleAddMiniApp = useCallback(async () => {
     try {
@@ -96,7 +100,7 @@ export function MiniAppProvider({ children, addMiniAppOnLoad }: MiniAppProviderP
         context,
       }}
     >
-      <FrameWalletProvider>{children}</FrameWalletProvider>
+      {children}
     </MiniAppContext.Provider>
   );
 }

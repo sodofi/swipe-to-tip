@@ -504,13 +504,13 @@ export default function SwipeToGive() {
                   DISCOVER
                 </h1>
                 <div className="flex flex-wrap gap-2 md:gap-4">
-                  <div className="brutalist-card bg-celo-green p-3 md:p-4">
-                    <p className="brutalist-body text-white text-sm md:text-lg brutalist-heavy uppercase">
+                  <div className="brutalist-card bg-celo-lime p-3 md:p-4">
+                    <p className="brutalist-body text-black text-sm md:text-lg brutalist-heavy uppercase">
                       CELO PROJECTS
                     </p>
                   </div>
-                  <div className="brutalist-card bg-black p-3 md:p-4">
-                    <span className="brutalist-body text-celo-yellow brutalist-heavy uppercase tracking-wider text-sm md:text-base">
+                  <div className="brutalist-card bg-celo-pink p-3 md:p-4">
+                    <span className="brutalist-body text-black brutalist-heavy uppercase tracking-wider text-sm md:text-base">
                       {remainingCards} LEFT
                     </span>
                   </div>

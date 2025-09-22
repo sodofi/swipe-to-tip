@@ -1,0 +1,14 @@
+
+> web@0.1.0 dev /Users/sophiadew/CODE/swipe-to-tip/apps/web
+> next dev
+
+ ⚠ Port 3000 is in use, trying 3001 instead.
+ ⚠ Port 3001 is in use, trying 3002 instead.
+ ⚠ Port 3002 is in use, trying 3003 instead.
+  ▲ Next.js 14.2.32
+  - Local:        http://localhost:3003
+  - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 1641ms
+[?25h

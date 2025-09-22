@@ -20,7 +20,7 @@ export function Navbar() {
   const pathname = usePathname()
   
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-celo-green backdrop-blur-md supports-[backdrop-filter]:bg-celo-lime">
       <div className="container flex h-16 max-w-screen-2xl items-center justify-between px-4">
         <div className="flex items-center gap-2">
           {/* Mobile menu button */}
@@ -35,7 +35,7 @@ export function Navbar() {
               <div className="flex items-center gap-2 mb-8">
 
                 <span className="font-bold text-lg">
-                  farcaster-miniapp
+                  tipper
                 </span>
               </div>
               <nav className="flex flex-col gap-4">
