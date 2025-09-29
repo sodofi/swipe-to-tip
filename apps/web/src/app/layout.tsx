@@ -14,10 +14,10 @@ const frame = {
   version: "1",
   imageUrl: `${appUrl}/hero.png`,
   button: {
-    title: "Launch farcaster-miniapp",
+    title: "Launch Tippers",
     action: {
       type: "launch_frame",
-      name: "farcaster-miniapp",
+      name: "tippers",
       url: appUrl,
       splashImageUrl: `${appUrl}/icon.png`,
       splashBackgroundColor: "#ffffff",
