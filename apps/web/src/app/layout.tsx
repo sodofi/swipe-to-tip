@@ -12,7 +12,7 @@ const appUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 // Embed metadata for Farcaster sharing
 const frame = {
   version: "1",
-  imageUrl: `${appUrl}/opengraph-image.png`,
+  imageUrl: `${appUrl}/hero.png`,
   button: {
     title: "Launch farcaster-miniapp",
     action: {
@@ -26,10 +26,10 @@ const frame = {
 };
 
 export const metadata: Metadata = {
-  title: 'farcaster-miniapp',
+  title: 'tippers',
   description: 'View Celo projects and swipe to fund',
   openGraph: {
-    title: 'farcaster-miniapp',
+    title: 'tippers',
     description: 'View Celo projects and swipe to fund',
     images: [`${appUrl}/hero.png`],
   },
