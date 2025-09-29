@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'farcaster-miniapp',
     description: 'View Celo projects and swipe to fund',
-    images: [`${appUrl}/opengraph-image.png`],
+    images: [`${appUrl}/hero.png`],
   },
   other: {
     "fc:frame": JSON.stringify(frame),
